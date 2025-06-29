@@ -1,9 +1,11 @@
-// AI Prompt Generator Service with Real AI Integration
+// AI Prompt Generator Service with Multi-AI Support
 import AnthropicClient from './anthropicClient'
+import OpenAIClient from './openaiClient'
 
 class PromptGenerator {
   constructor() {
     this.anthropicClient = new AnthropicClient()
+    this.openaiClient = new OpenAIClient()
     this.isOnline = navigator.onLine
     
     // Listen for online/offline status
@@ -17,26 +19,27 @@ class PromptGenerator {
   }
 
   // Main method to generate prompts using real AI
-  async generateComprehensivePrompt(userIdea) {
+  async generateComprehensivePrompt(userIdea, preferredProvider = 'auto') {
     try {
       // Try to use real AI first
-      if (this.isOnline && this.anthropicClient.apiKey) {
-        const result = await this.anthropicClient.generatePrompt(userIdea, 'comprehensive', 'general')
+      if (this.isOnline) {
+        const result = await this.generateWithBestAvailableProvider(userIdea, 'comprehensive', 'general', preferredProvider)
         
-        // Add analysis metadata
-        const analysis = this.analyzeUserInput(userIdea)
-        
-        return {
-          ...result,
-          analysis,
-          isRealAI: true,
-          source: 'anthropic-claude'
+        if (result) {
+          // Add analysis metadata
+          const analysis = this.analyzeUserInput(userIdea)
+          
+          return {
+            ...result,
+            analysis,
+            isRealAI: true
+          }
         }
-      } else {
-        // Fallback to template-based generation
-        console.warn('Using fallback prompt generation (API unavailable or offline)')
-        return this.generateFallbackPrompt(userIdea, 'comprehensive', 'general')
       }
+      
+      // Fallback to template-based generation
+      console.warn('Using fallback prompt generation (API unavailable or offline)')
+      return this.generateFallbackPrompt(userIdea, 'comprehensive', 'general')
     } catch (error) {
       console.error('Error generating comprehensive prompt:', error)
       // Fallback on error
@@ -45,31 +48,109 @@ class PromptGenerator {
   }
 
   // Generate focused prompts using real AI
-  async generateFocusedPrompt(userIdea, focusArea = 'general') {
+  async generateFocusedPrompt(userIdea, focusArea = 'general', preferredProvider = 'auto') {
     try {
       // Try to use real AI first
-      if (this.isOnline && this.anthropicClient.apiKey) {
-        const result = await this.anthropicClient.generatePrompt(userIdea, 'focused', focusArea)
+      if (this.isOnline) {
+        const result = await this.generateWithBestAvailableProvider(userIdea, 'focused', focusArea, preferredProvider)
         
-        // Add analysis metadata
-        const analysis = this.analyzeUserInput(userIdea)
-        
-        return {
-          ...result,
-          analysis,
-          isRealAI: true,
-          source: 'anthropic-claude'
+        if (result) {
+          // Add analysis metadata
+          const analysis = this.analyzeUserInput(userIdea)
+          
+          return {
+            ...result,
+            analysis,
+            isRealAI: true
+          }
         }
-      } else {
-        // Fallback to template-based generation
-        console.warn('Using fallback prompt generation (API unavailable or offline)')
-        return this.generateFallbackPrompt(userIdea, 'focused', focusArea)
       }
+      
+      // Fallback to template-based generation
+      console.warn('Using fallback prompt generation (API unavailable or offline)')
+      return this.generateFallbackPrompt(userIdea, 'focused', focusArea)
     } catch (error) {
       console.error('Error generating focused prompt:', error)
       // Fallback on error
       return this.generateFallbackPrompt(userIdea, 'focused', focusArea)
     }
+  }
+
+  // Smart provider selection and fallback
+  async generateWithBestAvailableProvider(userIdea, promptType, focusArea, preferredProvider) {
+    const providers = this.getAvailableProviders()
+    
+    if (providers.length === 0) {
+      return null
+    }
+
+    // Determine which provider to try first
+    let primaryProvider, fallbackProvider
+    
+    if (preferredProvider === 'anthropic' && providers.includes('anthropic')) {
+      primaryProvider = 'anthropic'
+      fallbackProvider = providers.find(p => p !== 'anthropic')
+    } else if (preferredProvider === 'openai' && providers.includes('openai')) {
+      primaryProvider = 'openai'
+      fallbackProvider = providers.find(p => p !== 'openai')
+    } else {
+      // Auto-select: prefer Anthropic for comprehensive, OpenAI for focused
+      if (promptType === 'comprehensive' && providers.includes('anthropic')) {
+        primaryProvider = 'anthropic'
+        fallbackProvider = providers.find(p => p !== 'anthropic')
+      } else if (providers.includes('openai')) {
+        primaryProvider = 'openai'
+        fallbackProvider = providers.find(p => p !== 'openai')
+      } else {
+        primaryProvider = providers[0]
+        fallbackProvider = providers[1]
+      }
+    }
+
+    // Try primary provider
+    try {
+      if (primaryProvider === 'anthropic') {
+        const result = await this.anthropicClient.generatePrompt(userIdea, promptType, focusArea)
+        return { ...result, source: 'anthropic-claude' }
+      } else if (primaryProvider === 'openai') {
+        const result = await this.openaiClient.generatePrompt(userIdea, promptType, focusArea)
+        return { ...result, source: 'openai-gpt4' }
+      }
+    } catch (error) {
+      console.warn(`Primary provider (${primaryProvider}) failed:`, error.message)
+      
+      // Try fallback provider if available
+      if (fallbackProvider) {
+        try {
+          if (fallbackProvider === 'anthropic') {
+            const result = await this.anthropicClient.generatePrompt(userIdea, promptType, focusArea)
+            return { ...result, source: 'anthropic-claude' }
+          } else if (fallbackProvider === 'openai') {
+            const result = await this.openaiClient.generatePrompt(userIdea, promptType, focusArea)
+            return { ...result, source: 'openai-gpt4' }
+          }
+        } catch (fallbackError) {
+          console.warn(`Fallback provider (${fallbackProvider}) also failed:`, fallbackError.message)
+        }
+      }
+    }
+
+    return null
+  }
+
+  // Get list of available providers based on API keys
+  getAvailableProviders() {
+    const providers = []
+    
+    if (this.anthropicClient.apiKey) {
+      providers.push('anthropic')
+    }
+    
+    if (this.openaiClient.apiKey) {
+      providers.push('openai')
+    }
+    
+    return providers
   }
 
   // Fallback method using templates (original demo logic)
@@ -137,15 +218,20 @@ class PromptGenerator {
 
   // Check if real AI is available
   isRealAIAvailable() {
-    return this.isOnline && this.anthropicClient.apiKey
+    return this.isOnline && this.getAvailableProviders().length > 0
   }
 
   // Get API status
   getAPIStatus() {
+    const providers = this.getAvailableProviders()
+    
     return {
       online: this.isOnline,
-      hasApiKey: !!this.anthropicClient.apiKey,
-      canUseRealAI: this.isRealAIAvailable()
+      hasAnthropicKey: !!this.anthropicClient.apiKey,
+      hasOpenAIKey: !!this.openaiClient.apiKey,
+      availableProviders: providers,
+      canUseRealAI: this.isRealAIAvailable(),
+      preferredProvider: providers.includes('anthropic') ? 'anthropic' : providers[0] || null
     }
   }
 }
