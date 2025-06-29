@@ -3,7 +3,7 @@
 class AnthropicClient {
   constructor() {
     this.apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
-    this.baseUrl = 'https://api.anthropic.com/v1/messages'
+    this.baseUrl = '/api/anthropic/v1/messages'
   }
 
   async generatePrompt(userIdea, promptType = 'comprehensive', focusArea = 'general') {
