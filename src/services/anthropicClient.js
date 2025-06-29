@@ -62,6 +62,12 @@ class AnthropicClient {
       }
     } catch (error) {
       console.error('Anthropic API Error:', error)
+      
+      // Handle specific CORS/network errors
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        throw new Error('Unable to connect to Anthropic API. This is likely due to CORS restrictions when calling external APIs directly from the browser. Consider using a backend proxy server for production use.')
+      }
+      
       throw new Error(`Failed to generate prompt: ${error.message}`)
     }
   }
@@ -115,6 +121,34 @@ ${promptType === 'comprehensive' ?
 The output should be a complete system prompt that can be directly used with any AI assistant. Do not include explanations or meta-commentary - just return the actual system prompt content.`
 
     return analysisPrompt
+  }
+
+  // Check if API is accessible (basic connectivity test)
+  async testConnection() {
+    if (!this.apiKey) {
+      return { success: false, error: 'No API key configured' }
+    }
+
+    try {
+      // Simple test request with minimal tokens
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': this.apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-sonnet-20240229',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'Hi' }]
+        })
+      })
+
+      return { success: response.ok, status: response.status }
+    } catch (error) {
+      return { success: false, error: error.message }
+    }
   }
 
   // Fallback method for when API is unavailable

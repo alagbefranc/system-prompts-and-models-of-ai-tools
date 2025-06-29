@@ -22,7 +22,7 @@ class OpenAIClient {
           'Authorization': `Bearer ${this.apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: 'gpt-4',
           messages: [
             {
               role: 'system',
@@ -40,12 +40,12 @@ class OpenAIClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(`OpenAI API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
+        throw new Error(`API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
       }
 
       const data = await response.json()
       
-      if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
         throw new Error('Invalid response format from OpenAI API')
       }
 
@@ -55,7 +55,7 @@ class OpenAIClient {
         prompt: content,
         metadata: {
           generatedAt: new Date().toISOString(),
-          model: 'gpt-4o',
+          model: 'gpt-4',
           promptType,
           focusArea,
           promptLength: content.length,
@@ -66,6 +66,12 @@ class OpenAIClient {
       }
     } catch (error) {
       console.error('OpenAI API Error:', error)
+      
+      // Handle specific CORS/network errors
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        throw new Error('Unable to connect to OpenAI API. This is likely due to CORS restrictions when calling external APIs directly from the browser. Consider using a backend proxy server for production use.')
+      }
+      
       throw new Error(`Failed to generate prompt: ${error.message}`)
     }
   }
@@ -119,6 +125,33 @@ ${promptType === 'comprehensive' ?
 The output should be a complete system prompt that can be directly used with any AI assistant. Do not include explanations or meta-commentary - just return the actual system prompt content.`
 
     return analysisPrompt
+  }
+
+  // Check if API is accessible (basic connectivity test)
+  async testConnection() {
+    if (!this.apiKey) {
+      return { success: false, error: 'No API key configured' }
+    }
+
+    try {
+      // Simple test request with minimal tokens
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: 'Hi' }],
+          max_tokens: 5
+        })
+      })
+
+      return { success: response.ok, status: response.status }
+    } catch (error) {
+      return { success: false, error: error.message }
+    }
   }
 
   // Fallback method for when API is unavailable

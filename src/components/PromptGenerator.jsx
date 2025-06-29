@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Wand2, Copy, Check, Download, Sparkles, Settings, Brain, Code, Palette, Bug, Wifi, WifiOff, AlertCircle, CheckCircle, Zap } from 'lucide-react'
+import { Wand2, Copy, Check, Download, Sparkles, Settings, Brain, Code, Palette, Bug, Wifi, WifiOff, AlertCircle, CheckCircle, Zap, Info } from 'lucide-react'
 import PromptGenerator from '../services/promptGenerator'
 
 const PromptGeneratorComponent = () => {
@@ -17,7 +17,8 @@ const PromptGeneratorComponent = () => {
     hasOpenAIKey: false,
     availableProviders: [],
     canUseRealAI: false,
-    preferredProvider: null
+    preferredProvider: null,
+    corsWarning: null
   })
   const [error, setError] = useState(null)
 
@@ -51,7 +52,32 @@ const PromptGeneratorComponent = () => {
       setGeneratedPrompt(result)
     } catch (error) {
       console.error('Error generating prompt:', error)
-      setError(error.message || 'Failed to generate prompt. Please try again.')
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to generate prompt. Please try again.'
+      
+      if (error.message.includes('CORS restrictions')) {
+        errorMessage = 'Unable to connect to AI APIs due to browser security restrictions. The app will use template-based generation instead. For production use, consider implementing a backend proxy server.'
+      } else if (error.message.includes('API key')) {
+        errorMessage = 'API key configuration issue. Using template-based generation instead.'
+      } else if (error.message.includes('Failed to fetch')) {
+        errorMessage = 'Network connection issue. Using template-based generation instead.'
+      }
+      
+      setError(errorMessage)
+      
+      // Still try to generate a fallback prompt
+      try {
+        let fallbackResult
+        if (promptType === 'comprehensive') {
+          fallbackResult = promptGenerator.generateFallbackPrompt(userIdea, 'comprehensive', 'general')
+        } else {
+          fallbackResult = promptGenerator.generateFallbackPrompt(userIdea, 'focused', focusArea)
+        }
+        setGeneratedPrompt(fallbackResult)
+      } catch (fallbackError) {
+        console.error('Fallback generation also failed:', fallbackError)
+      }
     } finally {
       setLoading(false)
     }
@@ -186,6 +212,20 @@ const PromptGeneratorComponent = () => {
             </div>
           ))}
         </div>
+
+        {/* CORS Warning */}
+        {apiStatus.corsWarning && apiStatus.availableProviders.length > 0 && (
+          <div className="max-w-2xl mx-auto p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start space-x-2">
+              <Info className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-blue-700">
+                <strong>Note:</strong> Direct API calls from the browser may be blocked by CORS policies. 
+                If you encounter connection issues, the app will automatically fall back to template-based generation. 
+                For production use with real AI APIs, consider implementing a backend proxy server.
+              </div>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Input Section */}
@@ -267,10 +307,12 @@ const PromptGeneratorComponent = () => {
           </div>
 
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="w-5 h-5 text-red-500" />
-                <span className="text-red-700 text-sm">{error}</span>
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start space-x-2">
+                <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                <div className="text-amber-700 text-sm">
+                  <strong>Notice:</strong> {error}
+                </div>
               </div>
             </div>
           )}

@@ -81,6 +81,7 @@ class PromptGenerator {
     const providers = this.getAvailableProviders()
     
     if (providers.length === 0) {
+      console.warn('No API providers available, using fallback')
       return null
     }
 
@@ -119,7 +120,13 @@ class PromptGenerator {
     } catch (error) {
       console.warn(`Primary provider (${primaryProvider}) failed:`, error.message)
       
-      // Try fallback provider if available
+      // Check if this is a CORS/network error that affects all providers
+      if (error.message.includes('CORS restrictions') || error.message.includes('Failed to fetch')) {
+        console.warn('CORS/Network error detected, skipping fallback provider and using template fallback')
+        return null
+      }
+      
+      // Try fallback provider if available and error is not network-related
       if (fallbackProvider) {
         try {
           if (fallbackProvider === 'anthropic') {
@@ -221,7 +228,7 @@ class PromptGenerator {
     return this.isOnline && this.getAvailableProviders().length > 0
   }
 
-  // Get API status
+  // Get API status with enhanced error information
   getAPIStatus() {
     const providers = this.getAvailableProviders()
     
@@ -231,7 +238,8 @@ class PromptGenerator {
       hasOpenAIKey: !!this.openaiClient.apiKey,
       availableProviders: providers,
       canUseRealAI: this.isRealAIAvailable(),
-      preferredProvider: providers.includes('anthropic') ? 'anthropic' : providers[0] || null
+      preferredProvider: providers.includes('anthropic') ? 'anthropic' : providers[0] || null,
+      corsWarning: providers.length > 0 ? 'Direct API calls may be blocked by CORS. Consider using a backend proxy for production.' : null
     }
   }
 }
