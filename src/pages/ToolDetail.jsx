@@ -17,142 +17,41 @@ const ToolDetail = () => {
   useEffect(() => {
     const loadToolsContent = async () => {
       try {
-        // In a real app, you'd fetch this from your API or file system
-        // For demo purposes, we'll show sample content
-        const sampleTools = {
-          'v0': {
-            tools: [
-              {
-                name: 'create_code_project',
-                description: 'Create a new code project with React components',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'string', description: 'Unique project identifier' },
-                    title: { type: 'string', description: 'Project title' },
-                    components: { type: 'array', description: 'React components to include' }
-                  }
-                }
-              },
-              {
-                name: 'quick_edit',
-                description: 'Make quick edits to existing code blocks',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    file_path: { type: 'string', description: 'Path to the file to edit' },
-                    instructions: { type: 'string', description: 'Edit instructions' }
-                  }
-                }
-              }
-            ]
-          },
-          'windsurf': {
-            tools: [
-              {
-                name: 'edit_file',
-                description: 'Edit an existing file with precise code changes',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    TargetFile: { type: 'string', description: 'The target file to modify' },
-                    Instruction: { type: 'string', description: 'Description of changes' },
-                    CodeEdit: { type: 'string', description: 'Precise lines of code to edit' }
-                  }
-                }
-              },
-              {
-                name: 'run_command',
-                description: 'Execute terminal commands',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    CommandLine: { type: 'string', description: 'Command to execute' },
-                    Cwd: { type: 'string', description: 'Working directory' },
-                    SafeToAutoRun: { type: 'boolean', description: 'Whether command is safe to auto-run' }
-                  }
-                }
-              },
-              {
-                name: 'browser_preview',
-                description: 'Spin up a browser preview for web servers',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    Url: { type: 'string', description: 'URL of the web server' },
-                    Name: { type: 'string', description: 'Short name for the server' }
-                  }
-                }
-              }
-            ]
-          },
-          'replit': {
-            tools: [
-              {
-                name: 'str_replace_editor',
-                description: 'Custom editing tool for viewing, creating and editing files',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    command: { type: 'string', enum: ['view', 'create', 'str_replace', 'insert', 'undo_edit'] },
-                    path: { type: 'string', description: 'Absolute path to file or directory' },
-                    file_text: { type: 'string', description: 'Content for create command' }
-                  }
-                }
-              },
-              {
-                name: 'packager_tool',
-                description: 'Install or uninstall libraries and dependencies',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    install_or_uninstall: { type: 'string', enum: ['install', 'uninstall'] },
-                    language_or_system: { type: 'string', description: 'Language or system type' },
-                    dependency_list: { type: 'array', items: { type: 'string' } }
-                  }
-                }
-              }
-            ]
-          },
-          'manus': {
-            tools: [
-              {
-                name: 'web_search',
-                description: 'Search the web for real-time information',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    search_term: { type: 'string', description: 'Search term to look up' },
-                    type: { type: 'string', enum: ['text', 'images'], description: 'Type of search' }
-                  }
-                }
-              },
-              {
-                name: 'browser_action',
-                description: 'Interact with websites through browser automation',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    action: { type: 'string', enum: ['launch', 'click', 'type', 'scroll_down', 'close'] },
-                    url: { type: 'string', description: 'URL for launch action' },
-                    text: { type: 'string', description: 'Text for type action' }
-                  }
-                }
-              }
-            ]
-          }
+        setLoading(true)
+        
+        // Map tool IDs to their actual tool files
+        const toolFiles = {
+          'v0': '/v0 Prompts and Tools/Tools.json',
+          'windsurf': '/Windsurf/Tools.json',
+          'replit': '/Replit/Tools.json',
+          'manus': '/Manus Agent Tools & Prompt/tools.json'
         }
 
-        // Simulate loading delay
-        await new Promise(resolve => setTimeout(resolve, 500))
-        
-        const toolData = sampleTools[toolName]
-        if (toolData) {
-          setToolsContent(JSON.stringify(toolData, null, 2))
-          setSelectedTool(toolData.tools[0])
+        const filePath = toolFiles[toolName]
+        if (filePath) {
+          const response = await fetch(filePath)
+          if (response.ok) {
+            const content = await response.text()
+            setToolsContent(content)
+            
+            // Try to parse and set the first tool as selected
+            try {
+              const parsed = JSON.parse(content)
+              if (parsed.tools && parsed.tools.length > 0) {
+                setSelectedTool(parsed.tools[0])
+              } else if (Array.isArray(parsed) && parsed.length > 0) {
+                setSelectedTool(parsed[0])
+              }
+            } catch (e) {
+              console.error('Error parsing tools JSON:', e)
+            }
+          } else {
+            setToolsContent('Tool configuration not available for this tool.')
+          }
         } else {
           setToolsContent('Tool configuration not available for this tool.')
         }
+        
         setLoading(false)
       } catch (error) {
         console.error('Error loading tools:', error)
@@ -161,7 +60,9 @@ const ToolDetail = () => {
       }
     }
 
-    loadToolsContent()
+    if (toolName) {
+      loadToolsContent()
+    }
   }, [toolName])
 
   const copyToClipboard = async () => {
@@ -185,7 +86,19 @@ const ToolDetail = () => {
     )
   }
 
-  const parsedTools = toolsContent ? JSON.parse(toolsContent) : null
+  let parsedTools = null
+  try {
+    if (toolsContent) {
+      const parsed = JSON.parse(toolsContent)
+      if (parsed.tools) {
+        parsedTools = parsed
+      } else if (Array.isArray(parsed)) {
+        parsedTools = { tools: parsed }
+      }
+    }
+  } catch (e) {
+    // Invalid JSON, keep parsedTools as null
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -291,9 +204,9 @@ const ToolDetail = () => {
                         : 'bg-white/5 hover:bg-white/10'
                     }`}
                   >
-                    <div className="font-medium text-white text-sm">{toolItem.name}</div>
+                    <div className="font-medium text-white text-sm">{toolItem.name || toolItem.function?.name || `Tool ${index + 1}`}</div>
                     <div className="text-white/60 text-xs mt-1 line-clamp-2">
-                      {toolItem.description}
+                      {toolItem.description || toolItem.function?.description || 'No description available'}
                     </div>
                   </button>
                 ))}
@@ -313,8 +226,12 @@ const ToolDetail = () => {
             {selectedTool ? (
               <>
                 <div className="p-4 sm:p-6 border-b border-white/10">
-                  <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">{selectedTool.name}</h3>
-                  <p className="text-white/80 text-sm">{selectedTool.description}</p>
+                  <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
+                    {selectedTool.name || selectedTool.function?.name || 'Tool Details'}
+                  </h3>
+                  <p className="text-white/80 text-sm">
+                    {selectedTool.description || selectedTool.function?.description || 'No description available'}
+                  </p>
                 </div>
                 
                 <div className="p-4 sm:p-6">
@@ -324,7 +241,7 @@ const ToolDetail = () => {
                   </h4>
                   
                   <pre className="bg-slate-900/50 rounded-lg p-4 text-xs sm:text-sm text-white/90 font-mono overflow-x-auto scrollbar-thin">
-                    <code>{JSON.stringify(selectedTool.parameters, null, 2)}</code>
+                    <code>{JSON.stringify(selectedTool.parameters || selectedTool.function?.parameters || {}, null, 2)}</code>
                   </pre>
                 </div>
               </>
