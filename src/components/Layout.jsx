@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Home, Github, Star, Menu, X } from 'lucide-react'
+import { Home, Github, Star, Menu, X, Wand2 } from 'lucide-react'
 
 const Layout = ({ children }) => {
   const location = useLocation()
@@ -40,6 +40,18 @@ const Layout = ({ children }) => {
               >
                 <Home size={18} />
                 <span>Home</span>
+              </Link>
+
+              <Link
+                to="/generator"
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                  location.pathname === '/generator' 
+                    ? 'bg-purple-100 text-purple-700' 
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                }`}
+              >
+                <Wand2 size={18} />
+                <span>Prompt Generator</span>
               </Link>
               
               <a
@@ -87,6 +99,19 @@ const Layout = ({ children }) => {
                 >
                   <Home size={18} />
                   <span>Home</span>
+                </Link>
+
+                <Link
+                  to="/generator"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                    location.pathname === '/generator' 
+                      ? 'bg-purple-100 text-purple-700' 
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                  }`}
+                >
+                  <Wand2 size={18} />
+                  <span>Prompt Generator</span>
                 </Link>
                 
                 <a
