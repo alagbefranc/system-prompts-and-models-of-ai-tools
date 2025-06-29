@@ -8,8 +8,8 @@ const Layout = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <nav className="glass-effect border-b border-white/10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
+      <nav className="glass-effect border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center space-x-3">
@@ -20,10 +20,10 @@ const Layout = ({ children }) => {
               >
                 <span className="text-white font-bold text-sm">AI</span>
               </motion.div>
-              <span className="text-white font-semibold text-lg hidden sm:block">
+              <span className="text-gray-800 font-semibold text-lg hidden sm:block">
                 System Prompts Explorer
               </span>
-              <span className="text-white font-semibold text-sm sm:hidden">
+              <span className="text-gray-800 font-semibold text-sm sm:hidden">
                 AI Prompts
               </span>
             </Link>
@@ -34,8 +34,8 @@ const Layout = ({ children }) => {
                 to="/"
                 className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
                   location.pathname === '/' 
-                    ? 'bg-white/20 text-white' 
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                 }`}
               >
                 <Home size={18} />
@@ -46,13 +46,13 @@ const Layout = ({ children }) => {
                 href="https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
               >
                 <Github size={18} />
                 <span>GitHub</span>
               </a>
               
-              <div className="flex items-center space-x-1 px-3 py-2 rounded-lg bg-yellow-500/20 text-yellow-300">
+              <div className="flex items-center space-x-1 px-3 py-2 rounded-lg bg-yellow-100 text-yellow-700">
                 <Star size={16} />
                 <span className="text-sm font-medium">7500+ Lines</span>
               </div>
@@ -61,7 +61,7 @@ const Layout = ({ children }) => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -73,7 +73,7 @@ const Layout = ({ children }) => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-white/10 py-4"
+              className="md:hidden border-t border-gray-200 py-4"
             >
               <div className="flex flex-col space-y-3">
                 <Link
@@ -81,8 +81,8 @@ const Layout = ({ children }) => {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
                     location.pathname === '/' 
-                      ? 'bg-white/20 text-white' 
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                      ? 'bg-blue-100 text-blue-700' 
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                   }`}
                 >
                   <Home size={18} />
@@ -94,13 +94,13 @@ const Layout = ({ children }) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
                 >
                   <Github size={18} />
                   <span>GitHub</span>
                 </a>
                 
-                <div className="flex items-center space-x-1 px-3 py-2 rounded-lg bg-yellow-500/20 text-yellow-300 w-fit">
+                <div className="flex items-center space-x-1 px-3 py-2 rounded-lg bg-yellow-100 text-yellow-700 w-fit">
                   <Star size={16} />
                   <span className="text-sm font-medium">7500+ Lines</span>
                 </div>
@@ -114,9 +114,9 @@ const Layout = ({ children }) => {
         {children}
       </main>
 
-      <footer className="border-t border-white/10 mt-8 sm:mt-16">
+      <footer className="border-t border-gray-200 mt-8 sm:mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="text-center text-white/60">
+          <div className="text-center text-gray-500">
             <p className="mb-2 text-sm sm:text-base">
               AI System Prompts & Models Collection
             </p>

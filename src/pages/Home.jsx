@@ -34,11 +34,11 @@ const Home = () => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-4 sm:space-y-6"
       >
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
           AI System Prompts
           <span className="gradient-text block">Explorer</span>
         </h1>
-        <p className="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto px-4">
+        <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
           Comprehensive collection of system prompts and tools from leading AI coding assistants. 
           Explore over 7500+ lines of insights into their structure and functionality.
         </p>
@@ -58,9 +58,9 @@ const Home = () => {
               transition={{ delay: index * 0.1 }}
               className="glass-effect rounded-lg p-3 sm:p-4 text-center"
             >
-              <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400 mx-auto mb-2" />
-              <div className="text-xl sm:text-2xl font-bold text-white">{stat.value}</div>
-              <div className="text-xs sm:text-sm text-white/60">{stat.label}</div>
+              <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500 mx-auto mb-2" />
+              <div className="text-xl sm:text-2xl font-bold text-gray-800">{stat.value}</div>
+              <div className="text-xs sm:text-sm text-gray-600">{stat.label}</div>
             </motion.div>
           ))}
         </div>
@@ -75,23 +75,23 @@ const Home = () => {
       >
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 w-4 h-4 sm:w-5 sm:h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
             <input
               type="text"
               placeholder="Search AI tools, companies, or features..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-3 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
             />
           </div>
           
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 sm:px-4 py-2 sm:py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base min-w-0 sm:min-w-[120px]"
+            className="px-3 sm:px-4 py-2 sm:py-3 bg-white border border-gray-200 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base min-w-0 sm:min-w-[120px]"
           >
             {categories.map(category => (
-              <option key={category} value={category} className="bg-slate-800 text-sm sm:text-base">
+              <option key={category} value={category} className="bg-white text-sm sm:text-base">
                 {category}
               </option>
             ))}
@@ -107,7 +107,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="glass-effect rounded-xl p-4 sm:p-6 hover:bg-white/15 transition-all duration-300 group"
+            className="glass-effect rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 group"
           >
             <div className="flex items-start justify-between mb-3 sm:mb-4">
               <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
@@ -115,18 +115,18 @@ const Home = () => {
                   {tool.icon}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-lg sm:text-xl font-semibold text-white group-hover:text-blue-300 transition-colors truncate">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 group-hover:text-blue-600 transition-colors truncate">
                     {tool.name}
                   </h3>
-                  <p className="text-white/60 text-xs sm:text-sm truncate">{tool.company}</p>
+                  <p className="text-gray-500 text-xs sm:text-sm truncate">{tool.company}</p>
                 </div>
               </div>
-              <span className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full whitespace-nowrap ml-2">
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full whitespace-nowrap ml-2">
                 {tool.category}
               </span>
             </div>
 
-            <p className="text-white/80 text-sm mb-3 sm:mb-4 line-clamp-2">
+            <p className="text-gray-600 text-sm mb-3 sm:mb-4 line-clamp-2">
               {tool.description}
             </p>
 
@@ -134,13 +134,13 @@ const Home = () => {
               {tool.features.slice(0, 3).map((feature, idx) => (
                 <span
                   key={idx}
-                  className="px-2 py-1 bg-white/10 text-white/70 text-xs rounded-md"
+                  className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md"
                 >
                   {feature}
                 </span>
               ))}
               {tool.features.length > 3 && (
-                <span className="px-2 py-1 bg-white/10 text-white/70 text-xs rounded-md">
+                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
                   +{tool.features.length - 3} more
                 </span>
               )}
@@ -151,7 +151,7 @@ const Home = () => {
                 {tool.hasPrompt && (
                   <Link
                     to={`/prompt/${tool.id}`}
-                    className="flex items-center space-x-1 px-2 sm:px-3 py-1 sm:py-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-colors text-xs sm:text-sm"
+                    className="flex items-center space-x-1 px-2 sm:px-3 py-1 sm:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs sm:text-sm"
                   >
                     <FileText size={12} className="sm:w-4 sm:h-4" />
                     <span>Prompt</span>
@@ -160,7 +160,7 @@ const Home = () => {
                 {tool.hasTools && (
                   <Link
                     to={`/tool/${tool.id}`}
-                    className="flex items-center space-x-1 px-2 sm:px-3 py-1 sm:py-2 bg-purple-500/20 text-purple-300 rounded-lg hover:bg-purple-500/30 transition-colors text-xs sm:text-sm"
+                    className="flex items-center space-x-1 px-2 sm:px-3 py-1 sm:py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-xs sm:text-sm"
                   >
                     <Code size={12} className="sm:w-4 sm:h-4" />
                     <span>Tools</span>
@@ -169,7 +169,7 @@ const Home = () => {
               </div>
               
               {!tool.hasPrompt && !tool.hasTools && (
-                <span className="text-white/40 text-xs sm:text-sm">Coming Soon</span>
+                <span className="text-gray-400 text-xs sm:text-sm">Coming Soon</span>
               )}
             </div>
           </motion.div>
@@ -182,8 +182,8 @@ const Home = () => {
           animate={{ opacity: 1 }}
           className="text-center py-8 sm:py-12"
         >
-          <div className="text-white/40 text-lg">No tools found matching your criteria</div>
-          <p className="text-white/30 mt-2">Try adjusting your search or filter</p>
+          <div className="text-gray-400 text-lg">No tools found matching your criteria</div>
+          <p className="text-gray-300 mt-2">Try adjusting your search or filter</p>
         </motion.div>
       )}
     </div>
