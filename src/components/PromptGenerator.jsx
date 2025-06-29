@@ -53,18 +53,19 @@ const PromptGeneratorComponent = () => {
     } catch (error) {
       console.error('Error generating prompt:', error)
       
-      // Provide more specific error messages
+      // Provide more specific error messages and categorize error types
       let errorMessage = 'Failed to generate prompt. Please try again.'
+      let errorType = 'error' // default error type
       
-      if (error.message.includes('CORS restrictions')) {
-        errorMessage = 'Unable to connect to AI APIs due to browser security restrictions. The app will use template-based generation instead. For production use, consider implementing a backend proxy server.'
+      if (error.message.includes('CORS restrictions') || error.message.includes('Failed to fetch')) {
+        errorMessage = 'Direct API calls are blocked by browser security policies. Using template-based generation instead.'
+        errorType = 'cors'
       } else if (error.message.includes('API key')) {
         errorMessage = 'API key configuration issue. Using template-based generation instead.'
-      } else if (error.message.includes('Failed to fetch')) {
-        errorMessage = 'Network connection issue. Using template-based generation instead.'
+        errorType = 'info'
       }
       
-      setError(errorMessage)
+      setError({ message: errorMessage, type: errorType })
       
       // Still try to generate a fallback prompt
       try {
@@ -145,6 +146,26 @@ const PromptGeneratorComponent = () => {
       case 'anthropic': return 'Claude'
       case 'openai': return 'GPT-4'
       default: return 'Template'
+    }
+  }
+
+  const getErrorStyles = (errorType) => {
+    switch (errorType) {
+      case 'cors':
+      case 'info':
+        return {
+          containerClass: 'bg-blue-50 border-blue-200',
+          iconClass: 'text-blue-500',
+          textClass: 'text-blue-700',
+          icon: Info
+        }
+      default:
+        return {
+          containerClass: 'bg-amber-50 border-amber-200',
+          iconClass: 'text-amber-500',
+          textClass: 'text-amber-700',
+          icon: AlertCircle
+        }
     }
   }
 
@@ -307,11 +328,13 @@ const PromptGeneratorComponent = () => {
           </div>
 
           {error && (
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className={`p-4 border rounded-lg ${getErrorStyles(error.type).containerClass}`}>
               <div className="flex items-start space-x-2">
-                <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-                <div className="text-amber-700 text-sm">
-                  <strong>Notice:</strong> {error}
+                {React.createElement(getErrorStyles(error.type).icon, {
+                  className: `w-5 h-5 ${getErrorStyles(error.type).iconClass} mt-0.5 flex-shrink-0`
+                })}
+                <div className={`text-sm ${getErrorStyles(error.type).textClass}`}>
+                  <strong>{error.type === 'cors' || error.type === 'info' ? 'Info:' : 'Notice:'}</strong> {error.message}
                 </div>
               </div>
             </div>
